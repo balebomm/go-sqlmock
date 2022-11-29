@@ -80,11 +80,11 @@ func (c *sqlmock) query(query string, args []namedValue) (*ExpectedQuery, error)
 	}
 
 	if expected == nil {
-		msg := "call to Query '%s' with args %+v was not expected"
+		msg := "call to Query '%s' with args %+v was not expected %v"
 		if fulfilled == len(c.expected) {
 			msg = "all expectations were already fulfilled, " + msg
 		}
-		return nil, fmt.Errorf(msg, query, args)
+		return nil, fmt.Errorf(msg, query, args, c.expected)
 	}
 
 	defer expected.Unlock()
