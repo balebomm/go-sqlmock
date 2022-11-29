@@ -217,13 +217,14 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 		}
 		if qr, ok := next.(*ExpectedQuery); ok {
 			if err := c.queryMatcher.Match(qr.expectSQL, query); err != nil {
-				errs = append(errs, err)
 				next.Unlock()
 				continue
 			}
 			if err := qr.attemptArgMatch(args); err == nil {
 				expected = qr
 				break
+			} else {
+				errs = append(errs, err)
 			}
 		}
 		next.Unlock()
