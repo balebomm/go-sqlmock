@@ -199,7 +199,7 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 	var expected *ExpectedQuery
 	var fulfilled int
 	var ok bool
-	var errs []error
+	errs :=  []error{}
 	for _, next := range c.expected {
 		next.Lock()
 		if next.fulfilled() {
@@ -217,7 +217,7 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 		}
 		if qr, ok := next.(*ExpectedQuery); ok {
 			if err := c.queryMatcher.Match(qr.expectSQL, query); err != nil {
-				append(errs, err)
+				errs = append(errs, err)
 				next.Unlock()
 				continue
 			}
