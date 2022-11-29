@@ -199,6 +199,7 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 	var expected *ExpectedQuery
 	var fulfilled int
 	var ok bool
+	var errs []error
 	for _, next := range c.expected {
 		next.Lock()
 		if next.fulfilled() {
@@ -216,6 +217,7 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 		}
 		if qr, ok := next.(*ExpectedQuery); ok {
 			if err := c.queryMatcher.Match(qr.expectSQL, query); err != nil {
+				append(errs, err)
 				next.Unlock()
 				continue
 			}
@@ -228,11 +230,11 @@ func (c *sqlmock) query(query string, args []driver.NamedValue) (*ExpectedQuery,
 	}
 
 	if expected == nil {
-		msg := "call to Query '%s' with args %+v was not expected %v"
+		msg := "call to Query '%s' with args %+v was not expected %v - %v"
 		if fulfilled == len(c.expected) {
 			msg = "all expectations were already fulfilled, " + msg
 		}
-		return nil, fmt.Errorf(msg, query, args, c.expected)
+		return nil, fmt.Errorf(msg, query, args, c.expected, errs)
 	}
 
 	defer expected.Unlock()
